@@ -69,7 +69,10 @@ function StationCodeDisplay({ code }: { code: StationCode }) {
 function StationCodeSeparator({
   codeLeft,
   codeRight,
-}: { codeLeft: StationCode | undefined; codeRight: StationCode | undefined }) {
+}: {
+  codeLeft: StationCode | undefined;
+  codeRight: StationCode | undefined;
+}) {
   if (!codeLeft || !codeRight) return null;
   if (codeLeft.colour.bg !== codeRight.colour.bg) return null;
   return <div style={{ height: "100%", background: BORDER_COLOUR, width: CODE_SEPARATOR_WIDTH }} />;
