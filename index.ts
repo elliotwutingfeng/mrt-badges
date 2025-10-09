@@ -16,7 +16,7 @@ const server = Bun.serve({
         return new Response(svg, {
           headers: {
             "Content-Type": "image/svg+xml",
-            "Cache-Control": "public, s-maxage=3600",
+            "Cache-Control": `public, s-maxage=${60 * 60 * 24}, max-age=${60 * 60 * 24}`,
           },
         });
       },
