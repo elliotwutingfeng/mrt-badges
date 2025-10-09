@@ -1,13 +1,8 @@
 import React from "react";
 import satori from "satori";
+import { ltaFontManager, svgCache } from "./cache";
 import { getStationDetails } from "./get-station-details";
 import type { Options, Station, StationCode, StationCodePart } from "./types";
-
-// Source: LTA Identity Font Typeface.zip in https://github.com/jglim/IdentityFont/issues/3
-// LTA Identity.ttf file
-// Reason we have to do this: The ttf/woff file hosted in the repo doesn't work with Satori for some
-// reasons (probably Satori's fault), but the ttf file uploaded in the issue works fine.
-const FONT_URL = "https://r2.joulev.dev/files/v9w4vh2nf0t8mxk71y4zi4xs";
 
 // Increase this for easier development
 const SCALE = 1;
@@ -26,11 +21,6 @@ const PART_CONNECTOR_WIDTH_OFFSET = 2 * SCALE;
 const PART_CONNECTOR_HEIGHT = 11 * SCALE;
 const PART_CONNECTOR_DX = 2 * SCALE;
 const BORDER_COLOUR = "white";
-
-async function getFont() {
-  const response = await fetch(FONT_URL);
-  return await response.arrayBuffer();
-}
 
 function StationCodeDisplay({ code }: { code: StationCode }) {
   const fontSize = code.lineCode.length + code.number.length > 4 ? FONT_SIZE_SM : FONT_SIZE;
@@ -251,8 +241,15 @@ function StationBadge({ station, options }: { station: Station; options: Options
 export async function generateSvg(rawStation: string, options: Options) {
   const station = getStationDetails(rawStation);
   const border = options.border || BORDER;
-  return satori(<StationBadge station={station} options={options} />, {
+
+  const cacheKey = `${rawStation}-${border}`;
+  const cachedSvg = svgCache.get(cacheKey);
+  if (cachedSvg) return cachedSvg;
+
+  const svg = await satori(<StationBadge station={station} options={options} />, {
     height: CODE_HEIGHT + border * 2,
-    fonts: [{ name: "main", data: await getFont(), weight: 400, style: "normal" }],
+    fonts: [{ name: "main", data: await ltaFontManager.getFont(), weight: 400, style: "normal" }],
   });
+  svgCache.set(cacheKey, svg);
+  return svg;
 }
